@@ -1,6 +1,6 @@
 /**
  * SavePR — Frontend Client Logic
- * Real-time SSE progress streaming, tabbed formats, and multi-threaded downloads.
+ * Real-time SSE progress streaming, tabbed format selectors, and multi-threaded downloads.
  */
 
 (function () {
@@ -82,7 +82,6 @@
     function saveHistory(item) {
         const history = getHistory();
         history.unshift(item);
-        // Keep max 30 items
         if (history.length > 30) history.pop();
         try {
             localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
@@ -317,7 +316,7 @@
             showError("Connection Error", "Could not connect to backend server.");
         } finally {
             fetchBtn.disabled = false;
-            fetchBtn.querySelector(".btn-text").textContent = "Analyze";
+            fetchBtn.querySelector(".btn-text").textContent = "Analyze Link";
         }
     }
 
@@ -391,7 +390,6 @@
         };
 
         activeEventSource.onerror = () => {
-            // Fallback to manual polling if SSE connection drops
             if (activeEventSource) {
                 activeEventSource.close();
                 activeEventSource = null;
@@ -448,7 +446,7 @@
             directFileDownloadBtn.setAttribute("download", job.filename || "video.mp4");
             downloadReadyBox.hidden = false;
 
-            // Trigger direct automatic browser download
+            // Direct download trigger
             const autoLink = document.createElement("a");
             autoLink.href = downloadUrl;
             autoLink.setAttribute("download", job.filename || "video.mp4");
@@ -456,7 +454,6 @@
             autoLink.click();
             autoLink.remove();
 
-            // Save to history
             saveHistory({
                 url: currentUrl,
                 title: job.title || currentVideoData?.title || "Video",
@@ -471,13 +468,11 @@
     // Event Listeners
     // -----------------------------------------------------------------------
 
-    // URL Form Submission
     urlForm.addEventListener("submit", (e) => {
         e.preventDefault();
         handleFetchFormats();
     });
 
-    // Clear Input
     urlInput.addEventListener("input", () => {
         clearBtn.hidden = urlInput.value.length === 0;
     });
@@ -488,7 +483,6 @@
         urlInput.focus();
     });
 
-    // Paste from clipboard
     pasteBtn.addEventListener("click", async () => {
         try {
             const text = await navigator.clipboard.readText();
@@ -502,20 +496,16 @@
         }
     });
 
-    // Dismiss Error
     errorDismissBtn.addEventListener("click", hideError);
 
-    // Quick One-Click Download Best
     quickDownloadBtn.addEventListener("click", () => {
         initiateDownload("best_original");
     });
 
-    // Standard Download Selected Format
     startDownloadBtn.addEventListener("click", () => {
         initiateDownload(selectedFormatId);
     });
 
-    // Cancel Active Download
     cancelDownloadBtn.addEventListener("click", async () => {
         if (!activeJobId) return;
         try {
@@ -527,7 +517,6 @@
         quickDownloadBtn.disabled = false;
     });
 
-    // Tab Switching
     tabButtons.forEach((btn) => {
         btn.addEventListener("click", () => {
             const target = btn.dataset.tab;
@@ -544,7 +533,6 @@
         });
     });
 
-    // History Modal
     historyToggleBtn.addEventListener("click", () => {
         renderHistoryList();
         historyModal.hidden = false;
@@ -564,7 +552,6 @@
         updateHistoryBadge();
     });
 
-    // Initialize History on page load
     updateHistoryBadge();
 
 })();
